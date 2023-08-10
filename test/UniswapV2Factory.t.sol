@@ -8,11 +8,6 @@ import {DeployUniswapV2Factory} from "../script/DeployUniswapV2Factory.s.sol";
 contract UniswapV2FactoryTest is Test {
     UniswapV2Factory factory;
 
-    address[2] TEST_ADDRESSES = [
-        0x1000000000000000000000000000000000000000,
-        0x2000000000000000000000000000000000000000
-    ];
-
     address immutable TOKEN_A = makeAddr("tokenA");
     address immutable TOKEN_B = makeAddr("tokenB");
     address immutable FEE_TO_SETTER = makeAddr("FEE_TO_SETTER");
@@ -30,7 +25,8 @@ contract UniswapV2FactoryTest is Test {
     }
 
     function testCreatePair() public {
-        factory.createPair(TEST_ADDRESSES[1], TEST_ADDRESSES[0]);
+        factory.createPair(TOKEN_A, TOKEN_B);
+        assertEq(factory.allPairsLength(), 1);
     }
 
     function testSetFeeTo() public {
@@ -55,6 +51,5 @@ contract UniswapV2FactoryTest is Test {
         vm.prank(FEE_TO_SETTER);
         factory.setFeeToSetter(FEE_TO_SETTER);
         assertEq(factory.feeToSetter(), FEE_TO_SETTER);
-
     }
 }
