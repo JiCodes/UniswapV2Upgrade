@@ -27,6 +27,52 @@ contract UniswapV2FactoryTest is Test {
     function testCreatePair() public {
         factory.createPair(TOKEN_A, TOKEN_B);
         assertEq(factory.allPairsLength(), 1);
+
+        // Test that creating the same pair again reverts
+        (bool success, ) = address(factory).call(
+            abi.encodeWithSignature(
+                "createPair(address,address)",
+                TOKEN_A,
+                TOKEN_B
+            )
+        );
+        assertFalse(success);
+
+        // Test that creating the pair with reversed token addresses also reverts
+        (bool successReversed, ) = address(factory).call(
+            abi.encodeWithSignature(
+                "createPair(address,address)",
+                TOKEN_B,
+                TOKEN_A
+            )
+        );
+        assertFalse(successReversed);
+
+        // Test that creating the pair with identical token addresses also reverts
+
+        address identicalAddress = TOKEN_A;
+        (bool successIdentical, ) = address(factory).call(
+            abi.encodeWithSignature(
+                "createPair(address,address)",
+                identicalAddress,
+                identicalAddress
+            )
+        );
+        assertFalse(
+            successIdentical,
+            "Expecting a revert for IDENTICAL_ADDRESSES"
+        );
+
+        // Test that creating the pair with zero address also reverts
+        address zeroAddress = address(0);
+        (bool successZeroAddress, ) = address(factory).call(
+            abi.encodeWithSignature(
+                "createPair(address,address)",
+                zeroAddress,
+                TOKEN_B
+            )
+        );
+        assertFalse(successZeroAddress, "Expecting a revert for ZERO_ADDRESS");
     }
 
     function testSetFeeTo() public {
@@ -43,6 +89,7 @@ contract UniswapV2FactoryTest is Test {
 
     function testSetFeeToSetter() public {
         address other = makeAddr("other");
+        vm.prank(other);
         (bool success, ) = address(factory).call(
             abi.encodeWithSignature("setFeeToSetter(address)", other)
         );
